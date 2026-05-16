@@ -4,51 +4,60 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { Card, Button } from '@components/ui';
 import { theme } from '@constants/index';
+import Feather from '@expo/vector-icons/Feather';
+import { useTheme } from '@contexts/ThemeContext';
 
 export default function ProfileScreen() {
+  const { colors, isDark, toggleTheme } = useTheme();
   const totalMemories = 5;
   const tagsCreated = 12;
   const thisWeek = 3;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Profile</Text>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: colors.foreground }]}>Profile</Text>
+          <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
+            <Feather name={isDark ? 'sun' : 'moon'} size={20} color={colors.foreground} />
+          </TouchableOpacity>
+        </View>
 
         {/* Profile Info */}
         <View style={styles.profileSection}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>MG</Text>
+          <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.avatarText, { color: colors.primaryForeground }]}>MG</Text>
           </View>
-          <Text style={styles.name}>Memory User</Text>
-          <Text style={styles.email}>memory@graph.app</Text>
+          <Text style={[styles.name, { color: colors.foreground }]}>Memory User</Text>
+          <Text style={[styles.email, { color: colors.mutedForeground }]}>memory@graph.app</Text>
         </View>
 
         {/* Stats */}
         <View style={styles.statsSection}>
           <Card padding={theme.spacing.md}>
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Total Memories</Text>
-              <Text style={styles.statValue}>{totalMemories}</Text>
+              <Text style={[styles.statLabel, { color: colors.foreground }]}>Total Memories</Text>
+              <Text style={[styles.statValue, { color: colors.primary }]}>{totalMemories}</Text>
             </View>
           </Card>
           <Card padding={theme.spacing.md}>
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>Tags Created</Text>
-              <Text style={styles.statValue}>{tagsCreated}</Text>
+              <Text style={[styles.statLabel, { color: colors.foreground }]}>Tags Created</Text>
+              <Text style={[styles.statValue, { color: colors.primary }]}>{tagsCreated}</Text>
             </View>
           </Card>
           <Card padding={theme.spacing.md}>
             <View style={styles.statRow}>
-              <Text style={styles.statLabel}>This Week</Text>
-              <Text style={styles.statValue}>{thisWeek} new</Text>
+              <Text style={[styles.statLabel, { color: colors.foreground }]}>This Week</Text>
+              <Text style={[styles.statValue, { color: colors.primary }]}>{thisWeek} new</Text>
             </View>
           </Card>
         </View>
@@ -85,7 +94,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   scrollView: {
     flex: 1,
@@ -95,11 +103,18 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.xl,
     paddingBottom: theme.spacing.xl,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xl,
+  },
   title: {
     fontSize: theme.fontSize['2xl'],
     fontWeight: theme.fontWeight.bold as any,
-    color: theme.colors.foreground,
-    marginBottom: theme.spacing.xl,
+  },
+  themeToggle: {
+    padding: theme.spacing.sm,
   },
   profileSection: {
     alignItems: 'center',
@@ -108,7 +123,6 @@ const styles = StyleSheet.create({
   avatar: {
     width: 80,
     height: 80,
-    backgroundColor: theme.colors.primary,
     borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
@@ -117,17 +131,14 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: theme.fontSize['2xl'],
     fontWeight: theme.fontWeight.bold as any,
-    color: theme.colors.primaryForeground,
   },
   name: {
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.medium as any,
-    color: theme.colors.foreground,
     marginBottom: theme.spacing.xs,
   },
   email: {
     fontSize: theme.fontSize.sm,
-    color: theme.colors.mutedForeground,
   },
   statsSection: {
     gap: theme.spacing.md,
@@ -140,12 +151,10 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: theme.fontSize.sm,
-    color: theme.colors.foreground,
   },
   statValue: {
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.bold as any,
-    color: theme.colors.primary,
   },
   actionsSection: {
     gap: theme.spacing.sm,

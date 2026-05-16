@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { theme } from '../../constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface CardProps {
   children: React.ReactNode;
@@ -20,9 +21,11 @@ export const Card: React.FC<CardProps> = ({
   onPress,
   padding = theme.spacing.lg,
 }) => {
+  const { colors } = useTheme();
+
   const cardStyle = StyleSheet.flatten([
     styles.card,
-    { padding },
+    { padding, backgroundColor: colors.card, borderColor: colors.border },
     style,
   ]);
 
@@ -43,10 +46,8 @@ export const Card: React.FC<CardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: theme.colors.card,
     borderRadius: theme.borderRadius.lg,
     borderWidth: 1,
-    borderColor: theme.colors.border,
     ...theme.shadows.sm,
   },
 });

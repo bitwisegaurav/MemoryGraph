@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { theme } from '../../constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -40,10 +41,20 @@ export const Button: React.FC<ButtonProps> = ({
   fullWidth = false,
   children,
 }) => {
+  const { colors } = useTheme();
+
   const getButtonStyle = (): ViewStyle => {
+    const variantStyles: Record<ButtonVariant, ViewStyle> = {
+      primary: { backgroundColor: colors.primary },
+      secondary: { backgroundColor: colors.secondary },
+      outline: { ...styles.outline, borderColor: colors.border },
+      ghost: styles.ghost,
+      destructive: { backgroundColor: colors.destructive },
+    };
+
     const baseStyle: ViewStyle = {
       ...styles.button,
-      ...styles[variant],
+      ...variantStyles[variant],
       ...styles[size],
       ...(fullWidth && styles.fullWidth),
       ...(disabled && styles.disabled),
@@ -53,12 +64,24 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const getTextStyle = (): TextStyle => {
+    const variantTextStyles: Record<ButtonVariant, TextStyle> = {
+      primary: { color: colors.primaryForeground },
+      secondary: { color: colors.secondaryForeground },
+      outline: { color: colors.foreground },
+      ghost: { color: colors.foreground },
+      destructive: { color: colors.destructiveForeground },
+    };
+
     const baseStyle: TextStyle = {
       ...styles.text,
-      ...styles[`${variant}Text`],
+      ...variantTextStyles[variant],
     };
 
     return baseStyle;
+  };
+
+  const getActivityColor = () => {
+    return variant === 'primary' ? colors.primaryForeground : colors.primary;
   };
 
   return (
@@ -69,13 +92,13 @@ export const Button: React.FC<ButtonProps> = ({
       activeOpacity={0.7}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#fff' : theme.colors.primary} />
+        <ActivityIndicator color={getActivityColor()} />
       ) : children ? (
         <View style={styles.content}>{children}</View>
       ) : (
         <View style={styles.content}>
           {icon && <View>{icon}</View>}
-          {/* {title && <Text style={[getTextStyle(), textStyle]}>{title}</Text>} */}
+          {title && <Text style={[getTextStyle(), textStyle]}>{title}</Text>}
         </View>
       )}
     </TouchableOpacity>
@@ -100,38 +123,21 @@ const styles = StyleSheet.create({
     fontWeight: theme.fontWeight.medium as any,
   },
   // Variants
-  primary: {
-    backgroundColor: theme.colors.primary,
-  },
-  primaryText: {
-    color: theme.colors.primaryForeground,
-  },
-  secondary: {
-    backgroundColor: theme.colors.secondary,
-  },
-  secondaryText: {
-    color: theme.colors.secondaryForeground,
-  },
+  primary: {},
+  primaryText: {},
+  secondary: {},
+  secondaryText: {},
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: theme.colors.border,
   },
-  outlineText: {
-    color: theme.colors.foreground,
-  },
+  outlineText: {},
   ghost: {
     backgroundColor: 'transparent',
   },
-  ghostText: {
-    color: theme.colors.foreground,
-  },
-  destructive: {
-    backgroundColor: theme.colors.destructive,
-  },
-  destructiveText: {
-    color: theme.colors.destructiveForeground,
-  },
+  ghostText: {},
+  destructive: {},
+  destructiveText: {},
   // Sizes
   sm: {
     paddingHorizontal: theme.spacing.md,

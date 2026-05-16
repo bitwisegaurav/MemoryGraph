@@ -13,8 +13,10 @@ import { theme } from '@constants/index';
 import { MemoryItem } from '@types/index';
 import { SparklesIcon } from '@components/icons';
 import Feather from '@expo/vector-icons/Feather';
+import { useTheme } from '@contexts/ThemeContext';
 
 export default function HomeScreen() {
+  const { colors, isDark, toggleTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [quickInput, setQuickInput] = useState('');
 
@@ -87,20 +89,25 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>MemoryGraph</Text>
-        <Text style={styles.subtitle}>Your intelligent memory space</Text>
+        <View style={styles.headerTop}>
+          <Text style={[styles.title, { color: colors.foreground }]}>MemoryGraph</Text>
+          <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
+            <Feather name={isDark ? 'sun' : 'moon'} size={20} color={colors.foreground} />
+          </TouchableOpacity>
+        </View>
+        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Your intelligent memory space</Text>
       </View>
 
       {/* Quick Capture */}
       <View style={styles.quickCaptureSection}>
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.foreground }]}
             placeholder="Save a thought, link, or idea..."
-            placeholderTextColor={theme.colors.mutedForeground}
+            placeholderTextColor={colors.mutedForeground}
             value={quickInput}
             onChangeText={setQuickInput}
             onSubmitEditing={handleQuickCapture}
@@ -109,12 +116,12 @@ export default function HomeScreen() {
             onPress={handleQuickCapture}
             style={styles.sparkleButton}
           >
-            <Feather name="search" size={20} color="black" />
+            <Feather name="search" size={20} color={colors.foreground} />
           </TouchableOpacity>
         </View>
         <View style={styles.aiHint}>
-          <SparklesIcon size={12} color={theme.colors.mutedForeground} />
-          <Text style={styles.aiHintText}>AI auto-categorization enabled</Text>
+          <SparklesIcon size={12} color={colors.mutedForeground} />
+          <Text style={[styles.aiHintText, { color: colors.mutedForeground }]}>AI auto-categorization enabled</Text>
         </View>
       </View>
 
@@ -141,22 +148,28 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     paddingHorizontal: theme.spacing.xl,
     paddingTop: theme.spacing.xl,
     paddingBottom: theme.spacing.md,
   },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xs,
+  },
   title: {
     fontSize: theme.fontSize['2xl'],
     fontWeight: theme.fontWeight.bold as any,
-    color: theme.colors.foreground,
     marginBottom: theme.spacing.xs,
+  },
+  themeToggle: {
+    padding: theme.spacing.sm,
   },
   subtitle: {
     fontSize: theme.fontSize.sm,
-    color: theme.colors.mutedForeground,
   },
   quickCaptureSection: {
     paddingHorizontal: theme.spacing.xl,
@@ -165,17 +178,14 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.inputBackground,
     borderRadius: theme.borderRadius.md,
     borderWidth: 1,
-    borderColor: theme.colors.border,
     paddingHorizontal: theme.spacing.md,
     height: 48,
   },
   searchInput: {
     flex: 1,
     fontSize: theme.fontSize.base,
-    color: theme.colors.foreground,
   },
   sparkleButton: {
     padding: theme.spacing.sm,

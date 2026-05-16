@@ -12,8 +12,10 @@ import { theme } from '@constants/index';
 import { SparklesIcon, PlusIcon, XIcon, SaveIcon, LinkIcon } from '@components/icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
+import { useTheme } from '@contexts/ThemeContext';
 
 export default function AddScreen() {
+  const { colors, isDark, toggleTheme } = useTheme();
   const [captureInput, setCaptureInput] = useState('');
   const [captureTitle, setCaptureTitle] = useState('');
   const [captureDescription, setCaptureDescription] = useState('');
@@ -93,18 +95,23 @@ export default function AddScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.title}>Save Memory</Text>
-          {hasAnalyzed && (
-            <TouchableOpacity onPress={resetCaptureForm}>
-              <Text style={styles.resetButton}>Reset</Text>
+          <Text style={[styles.title, { color: colors.foreground }]}>Save Memory</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
+              <Feather name={isDark ? 'sun' : 'moon'} size={20} color={colors.foreground} />
             </TouchableOpacity>
-          )}
+            {hasAnalyzed && (
+              <TouchableOpacity onPress={resetCaptureForm}>
+                <Text style={[styles.resetButton, { color: colors.primary }]}>Reset</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-        <Text style={styles.subtitle}>Paste a link or write a note</Text>
+        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>Paste a link or write a note</Text>
       </View>
 
       <ScrollView
@@ -115,7 +122,7 @@ export default function AddScreen() {
         <View style={styles.form}>
           {/* Input Field */}
           <View>
-            <Text style={styles.label}>Link or Content</Text>
+            <Text style={[styles.label, { color: colors.foreground }]}>Link or Content</Text>
             <Textarea
               placeholder="Paste a URL or type your note here..."
               value={captureInput}
@@ -161,7 +168,7 @@ export default function AddScreen() {
 
               {/* Title */}
               <View>
-                <Text style={styles.label}>Title *</Text>
+                <Text style={[styles.label, { color: colors.foreground }]}>Title *</Text>
                 <Input
                   placeholder="Enter title..."
                   value={captureTitle}
@@ -171,7 +178,7 @@ export default function AddScreen() {
 
               {/* Description */}
               <View>
-                <Text style={styles.label}>Description</Text>
+                <Text style={[styles.label, { color: colors.foreground }]}>Description</Text>
                 <Textarea
                   placeholder="Add a description..."
                   value={captureDescription}
@@ -182,7 +189,7 @@ export default function AddScreen() {
 
               {/* Tags */}
               <View>
-                <Text style={styles.label}>Tags</Text>
+                <Text style={[styles.label, { color: colors.foreground }]}>Tags</Text>
                 <View style={styles.tagsContainer}>
                   {captureTags.map((tag) => (
                     <TouchableOpacity
@@ -214,22 +221,21 @@ export default function AddScreen() {
                     icon={<Feather name='plus' size={16} color={theme.colors.foreground} />}
                   />
                 </View>
-              </View>
 
               {/* Preview for URLs */}
               {captureInput.match(/^(https?:\/\/)/) && (
                 <View>
-                  <Text style={styles.label}>Preview</Text>
+                  <Text style={[styles.label, { color: colors.foreground }]}>Preview</Text>
                   <Card padding={theme.spacing.md}>
                     <View style={styles.previewCard}>
                       <View style={styles.previewIcon}>
-                        <LinkIcon size={24} color={theme.colors.mutedForeground} />
+                        <Feather name="link" size={24} color={colors.mutedForeground} />
                       </View>
                       <View style={styles.previewContent}>
-                        <Text style={styles.previewTitle} numberOfLines={2}>
+                        <Text style={[styles.previewTitle, { color: colors.foreground }]} numberOfLines={2}>
                           {captureTitle}
                         </Text>
-                        <Text style={styles.previewUrl} numberOfLines={1}>
+                        <Text style={[styles.previewUrl, { color: colors.mutedForeground }]} numberOfLines={1}>
                           {captureInput}
                         </Text>
                       </View>
@@ -247,6 +253,7 @@ export default function AddScreen() {
               >
                 <Text style={styles.buttonText}>Save</Text>
               </Button>
+              </View>
             </>
           )}
         </View>
@@ -258,7 +265,6 @@ export default function AddScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     paddingHorizontal: theme.spacing.xl,
@@ -273,14 +279,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.spacing.xs,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+  },
   title: {
     fontSize: theme.fontSize['2xl'],
     fontWeight: theme.fontWeight.bold as any,
-    color: theme.colors.foreground,
+  },
+  themeToggle: {
+    padding: theme.spacing.sm,
   },
   resetButton: {
     fontSize: theme.fontSize.sm,
-    color: theme.colors.primary,
     fontWeight: theme.fontWeight.medium as any,
   },
   subtitle: {
@@ -301,7 +313,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium as any,
-    color: theme.colors.foreground,
     marginBottom: theme.spacing.sm,
   },
   analyzeButton: {
@@ -388,12 +399,10 @@ const styles = StyleSheet.create({
   previewTitle: {
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium as any,
-    color: theme.colors.foreground,
     marginBottom: theme.spacing.xs,
   },
   previewUrl: {
     fontSize: theme.fontSize.xs,
-    color: theme.colors.mutedForeground,
   },
   saveButton: {
     marginTop: theme.spacing.md,
