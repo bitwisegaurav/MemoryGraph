@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { Input, Textarea, Button, Card, Badge } from '../components/ui';
-import { theme } from '../constants';
-import { SparklesIcon, PlusIcon, XIcon, SaveIcon, LinkIcon } from '../components/icons';
+import { Input, Textarea, Button, Card, Badge } from '@components/ui';
+import { theme } from '@constants/index';
+import { SparklesIcon, PlusIcon, XIcon, SaveIcon, LinkIcon } from '@components/icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 
-export const AddScreen: React.FC = () => {
+export default function AddScreen() {
   const [captureInput, setCaptureInput] = useState('');
   const [captureTitle, setCaptureTitle] = useState('');
   const [captureDescription, setCaptureDescription] = useState('');
@@ -44,7 +45,6 @@ export const AddScreen: React.FC = () => {
       if (input.includes('idea') || input.includes('thought')) suggestedTags.push('idea');
       if (input.includes('code') || input.includes('programming')) suggestedTags.push('development');
       if (input.includes('design') || input.includes('ui')) suggestedTags.push('design');
-      if (!suggestedTags.length) suggestedTags.push('note', 'personal');
 
       setCaptureTitle(captureInput.slice(0, 60) + (captureInput.length > 60 ? '...' : ''));
       setCaptureDescription(captureInput);
@@ -190,9 +190,11 @@ export const AddScreen: React.FC = () => {
                       onPress={() => removeCaptureTag(tag)}
                       style={styles.tagButton}
                     >
-                      <Badge variant="secondary" style={styles.tagBadge}>
+                      <Badge variant="secondary" style={styles.tagBadge} childrenType="children">
                         <Text style={styles.tagText}>{tag}</Text>
-                        <XIcon size={12} color={theme.colors.foreground} />
+                        <View>
+                          <Feather name="x" size={12} color={theme.colors.foreground} />
+                        </View>
                       </Badge>
                     </TouchableOpacity>
                   ))}
@@ -209,7 +211,7 @@ export const AddScreen: React.FC = () => {
                     onPress={addCaptureTag}
                     disabled={!newTagInput.trim()}
                     variant="outline"
-                    icon={<PlusIcon size={16} color={theme.colors.foreground} />}
+                    icon={<Feather name='plus' size={16} color={theme.colors.foreground} />}
                   />
                 </View>
               </View>
@@ -243,8 +245,7 @@ export const AddScreen: React.FC = () => {
                 fullWidth
                 style={styles.saveButton}
               >
-                <SaveIcon size={16} color="#fff" />
-                <Text style={styles.buttonText}>Save Memory</Text>
+                <Text style={styles.buttonText}>Save</Text>
               </Button>
             </>
           )}
@@ -355,10 +356,11 @@ const styles = StyleSheet.create({
   tagBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.xs,
+    gap: theme.spacing.sm,
   },
   tagText: {
     fontSize: theme.fontSize.sm,
+    paddingBottom: theme.spacing.xs,
   },
   addTagRow: {
     flexDirection: 'row',

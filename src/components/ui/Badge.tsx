@@ -16,6 +16,7 @@ interface BadgeProps {
   style?: ViewStyle;
   textStyle?: TextStyle;
   onPress?: () => void;
+  childrenType?: 'text' | 'children';
 }
 
 export const Badge: React.FC<BadgeProps> = ({
@@ -24,6 +25,7 @@ export const Badge: React.FC<BadgeProps> = ({
   style,
   textStyle,
   onPress,
+  childrenType = 'text',
 }) => {
   const badgeStyle = StyleSheet.flatten([
     styles.badge,
@@ -39,7 +41,11 @@ export const Badge: React.FC<BadgeProps> = ({
 
   return (
     <View style={badgeStyle}>
-      <Text style={textStyleFlattened}>{children}</Text>
+      {childrenType === 'text' ? (
+        <Text style={textStyleFlattened}>{children}</Text>
+      ) : (
+        children
+      )}
     </View>
   );
 };

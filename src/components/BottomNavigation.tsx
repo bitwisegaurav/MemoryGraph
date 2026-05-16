@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { theme } from '../constants';
 import { TabName } from '../types';
 import { HomeIcon, PlusIcon, UserIcon } from './icons';
+import Feather from '@expo/vector-icons/Feather';
 
 interface BottomNavigationProps {
   activeTab: TabName;
@@ -14,9 +15,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   onTabChange,
 }) => {
   const tabs: { key: TabName; label: string; icon: React.ReactNode }[] = [
-    { key: 'home', label: 'Home', icon: <HomeIcon /> },
-    { key: 'add', label: 'Add', icon: <PlusIcon /> },
-    { key: 'profile', label: 'Profile', icon: <UserIcon /> },
+    { key: 'home', label: 'Home', icon: <Feather name="home" size={24} color="black" /> },
+    { key: 'add', label: 'Add', icon: <Feather name="search" size={24} color="black" /> },
+    { key: 'profile', label: 'Profile', icon: <Feather name="user" size={24} color="black" /> },
   ];
 
   return (

@@ -74,8 +74,8 @@ export const Button: React.FC<ButtonProps> = ({
         <View style={styles.content}>{children}</View>
       ) : (
         <View style={styles.content}>
-          {icon && <View style={styles.icon}>{icon}</View>}
-          {title && <Text style={[getTextStyle(), textStyle]}>{title}</Text>}
+          {icon && <View>{icon}</View>}
+          {/* {title && <Text style={[getTextStyle(), textStyle]}>{title}</Text>} */}
         </View>
       )}
     </TouchableOpacity>
@@ -93,9 +93,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  icon: {
-    marginRight: theme.spacing.xs,
+    gap: theme.spacing.xs,
   },
   text: {
     fontSize: theme.fontSize.base,

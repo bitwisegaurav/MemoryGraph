@@ -7,21 +7,14 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import { Input, Card } from '../components/ui';
-import { MemoryCard } from '../components/MemoryCard';
-import { theme } from '../constants';
-import { MemoryItem, TabName } from '../types';
-import { SparklesIcon } from '../components/icons';
+import { Input, Card } from '@components/ui';
+import { MemoryCard } from '@components/MemoryCard';
+import { theme } from '@constants/index';
+import { MemoryItem } from '@types/index';
+import { SparklesIcon } from '@components/icons';
 import Feather from '@expo/vector-icons/Feather';
-interface HomeScreenProps {
-  onTabChange: (tab: TabName) => void;
-  onMemoryPress: (item: MemoryItem) => void;
-}
 
-export const HomeScreen: React.FC<HomeScreenProps> = ({
-  onTabChange,
-  onMemoryPress,
-}) => {
+export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [quickInput, setQuickInput] = useState('');
 
@@ -89,6 +82,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   };
 
+  const handleMemoryPress = (item: MemoryItem) => {
+    console.log('Memory pressed:', item.id);
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -132,7 +129,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <MemoryCard
               key={item.id}
               item={item}
-              onPress={() => onMemoryPress(item)}
+              onPress={() => handleMemoryPress(item)}
             />
           ))}
         </View>
