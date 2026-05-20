@@ -1,0 +1,1 @@
+export const URL_REGEX = /(https?:\/\/[^\s]+|(www\.)[^\s.]+\.[^\s]{2,}|[^\s.]+\.(com|net|org|edu|gov|io|co|in|info|xyz|me|biz)[^\s]*)/gi;

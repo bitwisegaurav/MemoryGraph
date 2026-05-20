@@ -9,11 +9,13 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@google/genai": "^2.4.0",
     "expo": "~54.0.33",
     "expo-constants": "~18.0.13",
     "expo-linking": "~8.0.12",
     "expo-router": "~6.0.23",
     "expo-status-bar": "~3.0.9",
+    "html-to-text": "^10.0.0",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-mmkv": "^4.3.1",
@@ -23,6 +25,7 @@
     "react-native-svg": "15.12.1"
   },
   "devDependencies": {
+    "@types/html-to-text": "^9.0.4",
     "@types/react": "~19.1.0",
     "typescript": "~5.9.2"
   },

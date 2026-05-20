@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,12 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Switch,
+  Linking,
+  Alert,
 } from 'react-native';
 import { Input, Textarea, Button, Card, Badge } from '@components/ui';
-import { theme } from '@constants/index';
+import { theme, URL_REGEX } from '@constants/index';
 import { SparklesIcon, PlusIcon, XIcon, SaveIcon, LinkIcon } from '@components/icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
@@ -16,6 +19,9 @@ import { useTheme } from '@contexts/ThemeContext';
 import { memoryStorage } from '../../src/utils/mmkv';
 import { MemoryItem } from '../../src/types';
 import { useRouter } from 'expo-router';
+import ai from '@/src/services/ai/ai';
+import { fetchPartialHtml } from '@/src/utils/helpers';
+import { Type } from '@google/genai';
 
 export default function AddScreen() {
   const router = useRouter();
@@ -26,39 +32,90 @@ export default function AddScreen() {
   const [captureTags, setCaptureTags] = useState<string[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [shouldUseAI, setShouldUseAI] = useState(true);
   const [newTagInput, setNewTagInput] = useState('');
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const toggleAISwitch = () => {
+    const newValue = !shouldUseAI;
+    setShouldUseAI(newValue);
+    if (!newValue) {
+      setHasAnalyzed(true);
+    } else {
+      setHasAnalyzed(false);
+    }
+  };
+
+  async function getAIResponse(prompt: string) {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            title: { type: Type.STRING },
+            description: { type: Type.STRING },
+            tags: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING }
+            },
+            success: { type: Type.BOOLEAN },
+            error: { type: Type.STRING }
+          },
+          required: ["title", "description", "tags"],
+        }
+      }
+    });
+    if (!response.text?.trim() || response.text.length < 2) return { properties: { success: false, error: 'No response from AI' } };
+    return JSON.parse(response.text || '{}');
+  }
 
   const analyzeWithAI = async () => {
     if (!captureInput.trim()) return;
 
     setIsAnalyzing(true);
+    try {
+      const isURL = captureInput.match(URL_REGEX) !== null;
+      let contentToAnalyze = captureInput;
 
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+      if (isURL) {
+        try {
+          const fetchedContent = await fetchPartialHtml(captureInput.trim());
+          contentToAnalyze = fetchedContent || captureInput;
+        } catch (error) {
+          console.error('Failed to fetch HTML, falling back to raw input:', error);
+        }
+      }
 
-    // Check if input is a URL
-    const isURL = captureInput.match(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/);
+      const prompt = `
+        Analyze the following content and provide a title, a short description, and 3-5 relevant tags.
+        Content: ${contentToAnalyze}
+        
+        If it's a URL, use the context of the website content.
+        Respond in JSON format with title, description, and tags.
+      `;
 
-    if (isURL) {
-      setCaptureTitle('Amazing Article About AI and Memory Systems');
-      setCaptureDescription('Explore how artificial intelligence is revolutionizing personal knowledge management and memory augmentation through semantic search and auto-categorization.');
-      setCaptureTags(['ai', 'knowledge-management', 'productivity', 'article']);
-    } else {
-      const input = captureInput.toLowerCase();
-      const suggestedTags = [];
+      const aiResponse = await getAIResponse(prompt);
 
-      if (input.includes('meeting') || input.includes('discussion')) suggestedTags.push('meeting');
-      if (input.includes('idea') || input.includes('thought')) suggestedTags.push('idea');
-      if (input.includes('code') || input.includes('programming')) suggestedTags.push('development');
-      if (input.includes('design') || input.includes('ui')) suggestedTags.push('design');
-
-      setCaptureTitle(captureInput.slice(0, 60) + (captureInput.length > 60 ? '...' : ''));
+      if (aiResponse && aiResponse.title) {
+        setCaptureTitle(aiResponse.title);
+        setCaptureDescription(aiResponse.description || '');
+        setCaptureTags(aiResponse.tags || []);
+        scrollViewRef.current?.scrollTo(0);
+      } else {
+        throw new Error('Invalid AI response');
+      }
+    } catch (error) {
+      console.error('Error analyzing with AI:', error);
+      // On error, set hasAnalyzed to true so user can fill manually
+      setCaptureTitle(captureInput.slice(0, 40) + (captureInput.length > 40 ? '...' : ''));
       setCaptureDescription(captureInput);
-      setCaptureTags(suggestedTags);
+    } finally {
+      setIsAnalyzing(false);
+      setHasAnalyzed(true);
     }
-
-    setIsAnalyzing(false);
-    setHasAnalyzed(true);
   };
 
   const removeCaptureTag = (tagToRemove: string) => {
@@ -80,7 +137,7 @@ export default function AddScreen() {
     }
 
     const isURL = captureInput.match(/^(https?:\/\/)/);
-    
+
     const newMemory: MemoryItem = {
       id: Date.now().toString(),
       type: isURL ? 'link' : 'note',
@@ -113,6 +170,19 @@ export default function AddScreen() {
     setNewTagInput('');
   };
 
+  const handlePreviewPress = async () => {
+    const isURL = captureInput.match(URL_REGEX) !== null;
+    if (isURL) {
+      const url = captureInput.trim();
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('Error', 'Cannot open this URL');
+      }
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
@@ -139,6 +209,20 @@ export default function AddScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.form}>
+          {/* AI Toggle */}
+          <View style={[styles.toggleContainer, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
+            <View style={styles.toggleTextContainer}>
+              <Text style={[styles.toggleLabel, { color: colors.foreground }]}>Should search with ai?</Text>
+              <Text style={[styles.toggleSublabel, { color: colors.mutedForeground }]}>Auto-fill details using AI analysis</Text>
+            </View>
+            <Switch
+              value={shouldUseAI}
+              onValueChange={toggleAISwitch}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+
           {/* Input Field */}
           <View>
             <Text style={[styles.label, { color: colors.foreground }]}>Link or Content</Text>
@@ -175,15 +259,17 @@ export default function AddScreen() {
           {/* AI Generated Fields */}
           {hasAnalyzed && (
             <>
-              <View style={styles.aiBanner}>
-                <View style={styles.aiBannerContent}>
-                  <SparklesIcon size={16} color={theme.colors.primary} />
-                  <Text style={styles.aiBannerTitle}>AI Auto-filled</Text>
+              {shouldUseAI && (
+                <View style={styles.aiBanner}>
+                  <View style={styles.aiBannerContent}>
+                    <SparklesIcon size={16} color={theme.colors.primary} />
+                    <Text style={styles.aiBannerTitle}>AI Auto-filled</Text>
+                  </View>
+                  <Text style={styles.aiBannerText}>
+                    Review and edit the details below before saving
+                  </Text>
                 </View>
-                <Text style={styles.aiBannerText}>
-                  Review and edit the details below before saving
-                </Text>
-              </View>
+              )}
 
               {/* Title */}
               <View>
@@ -241,37 +327,37 @@ export default function AddScreen() {
                   />
                 </View>
 
-              {/* Preview for URLs */}
-              {captureInput.match(/^(https?:\/\/)/) && (
-                <View>
-                  <Text style={[styles.label, { color: colors.foreground }]}>Preview</Text>
-                  <Card padding={theme.spacing.md}>
-                    <View style={styles.previewCard}>
-                      <View style={styles.previewIcon}>
-                        <Feather name="link" size={24} color={colors.mutedForeground} />
+                {/* Preview for URLs */}
+                {captureInput.match(URL_REGEX) && (
+                  <View>
+                    <Text style={[styles.label, { color: colors.foreground }]}>Preview</Text>
+                    <Card padding={theme.spacing.md} onPress={handlePreviewPress}>
+                      <View style={styles.previewCard}>
+                        <View style={styles.previewIcon}>
+                          <Feather name="link" size={24} color={colors.mutedForeground} />
+                        </View>
+                        <View style={styles.previewContent}>
+                          <Text style={[styles.previewTitle, { color: colors.foreground }]} numberOfLines={2}>
+                            {captureTitle || captureInput}
+                          </Text>
+                          <Text style={[styles.previewUrl, { color: colors.mutedForeground }]} numberOfLines={1}>
+                            {captureInput}
+                          </Text>
+                        </View>
                       </View>
-                      <View style={styles.previewContent}>
-                        <Text style={[styles.previewTitle, { color: colors.foreground }]} numberOfLines={2}>
-                          {captureTitle}
-                        </Text>
-                        <Text style={[styles.previewUrl, { color: colors.mutedForeground }]} numberOfLines={1}>
-                          {captureInput}
-                        </Text>
-                      </View>
-                    </View>
-                  </Card>
-                </View>
-              )}
+                    </Card>
+                  </View>
+                )}
 
-              {/* Save Button */}
-              <Button
-                onPress={saveCapture}
-                variant="primary"
-                fullWidth
-                style={styles.saveButton}
-              >
-                <Text style={styles.buttonText}>Save</Text>
-              </Button>
+                {/* Save Button */}
+                <Button
+                  onPress={saveCapture}
+                  variant="primary"
+                  fullWidth
+                  style={styles.saveButton}
+                >
+                  <Text style={styles.buttonText}>Save</Text>
+                </Button>
               </View>
             </>
           )}
@@ -328,6 +414,26 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: theme.spacing.xl,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+  },
+  toggleTextContainer: {
+    flex: 1,
+    marginRight: theme.spacing.md,
+  },
+  toggleLabel: {
+    fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.medium as any,
+    marginBottom: 2,
+  },
+  toggleSublabel: {
+    fontSize: theme.fontSize.xs,
   },
   label: {
     fontSize: theme.fontSize.sm,
