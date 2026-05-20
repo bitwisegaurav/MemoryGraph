@@ -8,6 +8,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { theme } from '../../constants';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 interface ModalProps {
   visible: boolean;
@@ -22,6 +23,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   title,
 }) => {
+  const { colors } = useTheme();
   return (
     <RNModal
       visible={visible}
@@ -31,9 +33,9 @@ export const Modal: React.FC<ModalProps> = ({
     >
       <StatusBar barStyle="dark-content" />
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
           <View style={styles.header}>
-            {title && <Text style={styles.title}>{title}</Text>}
+            {title && <Text style={[styles.title, { color: colors.mutedForeground }]}>{title}</Text>}
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
@@ -56,6 +58,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: theme.borderRadius.xl,
     borderTopRightRadius: theme.borderRadius.xl,
     maxHeight: '90%',
+    // height: '90%',
   },
   header: {
     flexDirection: 'row',

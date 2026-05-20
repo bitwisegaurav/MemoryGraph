@@ -21,33 +21,6 @@ interface MemoryCardProps {
 }
 
 export const MemoryCard: React.FC<MemoryCardProps> = ({ item, onPress }) => {
-  const handleMenuPress = () => {
-    Alert.alert(
-      'Memory Options',
-      'What would you like to do?',
-      [
-        {
-          text: 'Delete',
-          onPress: () => {
-            Alert.alert(
-              'Delete Memory',
-              'Are you sure you want to delete this memory?',
-              [
-                {
-                  text: 'Delete',
-                  onPress: () => memoryStorage.deleteMemory(item.id),
-                  style: 'destructive',
-                },
-                { text: 'Cancel', style: 'cancel' },
-              ]
-            );
-          },
-          style: 'destructive',
-        },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
-  };
   const { colors } = useTheme();
 
   const getTypeIcon = () => {
@@ -78,13 +51,6 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({ item, onPress }) => {
             <Text style={[styles.title, { color: colors.foreground }]} numberOfLines={2}>
               {item.title}
             </Text>
-            <TouchableOpacity
-              onPress={handleMenuPress}
-              style={styles.moreButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Feather name="more-vertical" size={20} color={colors.mutedForeground} />
-            </TouchableOpacity>
           </View>
           <Text style={[styles.description, { color: colors.mutedForeground }]} numberOfLines={2}>
             {item.content}
