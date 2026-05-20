@@ -7,6 +7,7 @@ import {
   TextStyle,
 } from 'react-native';
 import { theme } from '../../constants';
+import { useTheme } from '@/src/contexts/ThemeContext';
 
 type BadgeVariant = 'default' | 'secondary' | 'outline' | 'destructive';
 
@@ -27,15 +28,19 @@ export const Badge: React.FC<BadgeProps> = ({
   onPress,
   childrenType = 'text',
 }) => {
+  const { colors } = useTheme();
+
   const badgeStyle = StyleSheet.flatten([
     styles.badge,
     styles[variant],
+    { backgroundColor: colors.muted },
     style,
   ]);
 
   const textStyleFlattened = StyleSheet.flatten([
     styles.text,
     styles[`${variant}Text`],
+    { color: colors.foreground },
     textStyle,
   ]);
 

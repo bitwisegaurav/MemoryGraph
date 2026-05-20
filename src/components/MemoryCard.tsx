@@ -64,7 +64,7 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({ item, onPress }) => {
           )}
           <View style={styles.tagsContainer}>
             {item.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" style={{ backgroundColor: colors.muted }}>
+              <Badge key={tag} variant="secondary">
                 {tag}
               </Badge>
             ))}

@@ -105,6 +105,7 @@ export const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
   return (
     <Modal visible={visible} onClose={onClose} title={editMode ? 'Edit Memory' : 'Memory Details'}>
       <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -122,6 +123,8 @@ export const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
               onChangeText={setEditedContent}
               placeholder="Add a description..."
               minHeight={120}
+              multiline
+              numberOfLines={7}
             />
           </View>
         ) : (
@@ -232,7 +235,7 @@ export const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
                 onPress={saveEdits}
                 variant="primary"
                 icon={<Feather name="save" size={16} color="#FFFFFF" />}
-                style={{ flex: 1 }}
+                style={{ flex: 1, backgroundColor: colors.primary }}
               >
                 <Text style={{ color: '#FFFFFF', marginLeft: theme.spacing.xs }}>Save</Text>
               </Button>
@@ -245,6 +248,9 @@ export const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    maxHeight: '95%'
+  },
   scrollContent: {
     paddingBottom: theme.spacing.xl,
   },
