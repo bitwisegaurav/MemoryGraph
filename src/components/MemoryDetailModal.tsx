@@ -10,7 +10,8 @@ import {
 import { Modal, Input, Button, Badge } from './ui';
 import { theme } from '../constants';
 import { MemoryItem } from '../types';
-import { EditIcon, SaveIcon, PlusIcon, XIcon, LinkIcon } from './icons';
+import { EditIcon, SaveIcon, PlusIcon, XIcon, LinkIcon, TrashIcon } from './icons';
+import { memoryStorage } from '../utils/mmkv';
 
 interface MemoryDetailModalProps {
   visible: boolean;
@@ -25,11 +26,13 @@ export const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
 }) => {
   const [editMode, setEditMode] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
+  const [editedContent, setEditedContent] = useState('');
   const [editedTags, setEditedTags] = useState<string[]>([]);
 
   React.useEffect(() => {
     if (item) {
       setEditedTitle(item.title);
+      setEditedContent(item.content);
       setEditedTags([...item.tags]);
       setEditMode(false);
     }
@@ -37,9 +40,21 @@ export const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
 
   const saveEdits = () => {
     if (item) {
-      // In a real app, you would update the item in your state/store
-      console.log('Saving edits:', editedTitle, editedTags);
+      const updatedItem: MemoryItem = {
+        ...item,
+        title: editedTitle,
+        content: editedContent,
+        tags: editedTags,
+      };
+      memoryStorage.saveMemory(updatedItem);
       setEditMode(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (item) {
+      memoryStorage.deleteMemory(item.id);
+      onClose();
     }
   };
 
@@ -122,7 +137,7 @@ export const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
         </View>
 
         <Text style={styles.date}>
-          Saved on {item.timestamp.toLocaleDateString('en-US', {
+          Saved on {new Date(item.timestamp).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -131,16 +146,26 @@ export const MemoryDetailModal: React.FC<MemoryDetailModalProps> = ({
 
         <View style={styles.actions}>
           {!editMode ? (
-            <Button
-              onPress={() => setEditMode(true)}
-              variant="outline"
-              icon={<EditIcon size={16} color={theme.colors.foreground} />}
-            />
+            <>
+              <Button
+                onPress={() => setEditMode(true)}
+                variant="outline"
+                icon={<EditIcon size={16} color={theme.colors.foreground} />}
+                style={{ flex: 1 }}
+              />
+              <Button
+                onPress={handleDelete}
+                variant="outline"
+                icon={<TrashIcon size={16} color={theme.colors.destructive || '#ef4444'} />}
+                style={{ flex: 1 }}
+              />
+            </>
           ) : (
             <Button
               onPress={saveEdits}
               variant="outline"
               icon={<SaveIcon size={16} color={theme.colors.foreground} />}
+              fullWidth
             />
           )}
         </View>

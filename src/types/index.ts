@@ -10,9 +10,10 @@ export interface MemoryItem {
   title: string;
   content: string;
   tags: string[];
-  timestamp: Date;
+  timestamp: string;
   preview?: string;
   url?: string;
+  image?: string;
 }
 
 export type TabName = 'home' | 'search' | 'add' | 'profile';

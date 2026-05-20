@@ -10,12 +10,18 @@ import { Card, Button } from '@components/ui';
 import { theme } from '@constants/index';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@contexts/ThemeContext';
+import { useMemories } from '../../src/utils/mmkv';
 
 export default function ProfileScreen() {
   const { colors, isDark, toggleTheme } = useTheme();
-  const totalMemories = 5;
-  const tagsCreated = 12;
-  const thisWeek = 3;
+  const memories = useMemories();
+  
+  const totalMemories = memories.length;
+  const tagsCreated = Array.from(new Set(memories.flatMap(m => m.tags))).length;
+  
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const thisWeek = memories.filter(m => new Date(m.timestamp) >= oneWeekAgo).length;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

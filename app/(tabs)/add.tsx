@@ -13,8 +13,12 @@ import { SparklesIcon, PlusIcon, XIcon, SaveIcon, LinkIcon } from '@components/i
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@contexts/ThemeContext';
+import { memoryStorage } from '../../src/utils/mmkv';
+import { MemoryItem } from '../../src/types';
+import { useRouter } from 'expo-router';
 
 export default function AddScreen() {
+  const router = useRouter();
   const { colors, isDark, toggleTheme } = useTheme();
   const [captureInput, setCaptureInput] = useState('');
   const [captureTitle, setCaptureTitle] = useState('');
@@ -75,7 +79,19 @@ export default function AddScreen() {
       return;
     }
 
-    console.log(`Memory saved!\n\nTitle: ${captureTitle}\nTags: ${captureTags.join(', ')}`);
+    const isURL = captureInput.match(/^(https?:\/\/)/);
+    
+    const newMemory: MemoryItem = {
+      id: Date.now().toString(),
+      type: isURL ? 'link' : 'note',
+      title: captureTitle,
+      content: captureDescription || captureInput,
+      tags: captureTags,
+      timestamp: new Date().toISOString(),
+      url: isURL ? captureInput : undefined,
+    };
+
+    memoryStorage.saveMemory(newMemory);
 
     // Reset form
     setCaptureInput('');
@@ -83,6 +99,9 @@ export default function AddScreen() {
     setCaptureDescription('');
     setCaptureTags([]);
     setHasAnalyzed(false);
+
+    // Navigate back to home
+    router.replace('/');
   };
 
   const resetCaptureForm = () => {

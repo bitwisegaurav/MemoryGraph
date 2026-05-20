@@ -61,3 +61,8 @@ export const FileTextIcon: React.FC<IconProps> = (props) => {
   const { size = 24, color = '#000', style } = props;
   return React.createElement(Text, { style: [{ fontSize: size, color, fontWeight: 'bold' }, style] }, 'F');
 };
+
+export const TrashIcon: React.FC<IconProps> = (props) => {
+  const { size = 24, color = '#000', style } = props;
+  return React.createElement(Text, { style: [{ fontSize: size, color, fontWeight: 'bold' }, style] }, 'D');
+};

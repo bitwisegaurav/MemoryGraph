@@ -10,63 +10,20 @@ import {
 import { Input, Card } from '@components/ui';
 import { MemoryCard } from '@components/MemoryCard';
 import { theme } from '@constants/index';
-import { MemoryItem } from '@types/index';
+import { MemoryItem } from '../../src/types';
 import { SparklesIcon } from '@components/icons';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@contexts/ThemeContext';
+import { useMemories, memoryStorage } from '../../src/utils/mmkv';
+import { MemoryDetailModal } from '../../src/components/MemoryDetailModal';
 
 export default function HomeScreen() {
   const { colors, isDark, toggleTheme } = useTheme();
+  const memories = useMemories();
   const [searchQuery, setSearchQuery] = useState('');
   const [quickInput, setQuickInput] = useState('');
-
-  // Mock memory items
-  const [memories] = useState<MemoryItem[]>([
-    {
-      id: '1',
-      type: 'note',
-      title: 'React Native Performance Tips',
-      content: 'Use FlatList instead of ScrollView for long lists. Implement shouldComponentUpdate or React.memo to prevent unnecessary re-renders.',
-      tags: ['development', 'react-native', 'performance'],
-      timestamp: new Date('2026-05-15'),
-    },
-    {
-      id: '2',
-      type: 'link',
-      title: 'AI Design Patterns 2026',
-      content: 'Comprehensive guide to modern AI design patterns',
-      tags: ['ai', 'design', 'learning'],
-      timestamp: new Date('2026-05-14'),
-      url: 'https://example.com/ai-patterns',
-      preview: 'Learn the latest AI integration patterns for modern applications...',
-    },
-    {
-      id: '3',
-      type: 'image',
-      title: 'UI Inspiration - Dashboard',
-      content: 'Beautiful dashboard design with data visualization',
-      tags: ['design', 'ui', 'inspiration'],
-      timestamp: new Date('2026-05-13'),
-      preview: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400',
-    },
-    {
-      id: '4',
-      type: 'note',
-      title: 'Meeting Notes - Product Review',
-      content: 'Discussed new features for Q3: semantic search, auto-categorization, and improved mobile UX. Priority on search performance.',
-      tags: ['meeting', 'product', 'notes'],
-      timestamp: new Date('2026-05-12'),
-    },
-    {
-      id: '5',
-      type: 'link',
-      title: 'Tailwind CSS v4 Updates',
-      content: 'New features and breaking changes in Tailwind v4',
-      tags: ['css', 'tailwind', 'web-development'],
-      timestamp: new Date('2026-05-11'),
-      url: 'https://tailwindcss.com/blog/v4',
-    },
-  ]);
+  const [selectedMemory, setSelectedMemory] = useState<MemoryItem | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const filteredMemories = searchQuery
     ? memories.filter(m =>
@@ -78,14 +35,23 @@ export default function HomeScreen() {
 
   const handleQuickCapture = () => {
     if (quickInput.trim()) {
-      // Simulate AI processing with auto-generated tags
-      console.log(`Captured: "${quickInput}"`);
+      const newMemory: MemoryItem = {
+        id: Date.now().toString(),
+        type: 'note',
+        title: quickInput.slice(0, 40) + (quickInput.length > 40 ? '...' : ''),
+        content: quickInput,
+        tags: ['quick-capture'],
+        timestamp: new Date().toISOString(),
+      };
+      
+      memoryStorage.saveMemory(newMemory);
       setQuickInput('');
     }
   };
 
   const handleMemoryPress = (item: MemoryItem) => {
-    console.log('Memory pressed:', item.id);
+    setSelectedMemory(item);
+    setModalVisible(true);
   };
 
   return (
@@ -141,6 +107,15 @@ export default function HomeScreen() {
           ))}
         </View>
       </ScrollView>
+
+      <MemoryDetailModal
+        visible={modalVisible}
+        item={selectedMemory}
+        onClose={() => {
+          setModalVisible(false);
+          setSelectedMemory(null);
+        }}
+      />
     </View>
   );
 };
