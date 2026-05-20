@@ -20,17 +20,36 @@ import { MemoryDetailModal } from '../../src/components/MemoryDetailModal';
 export default function HomeScreen() {
   const { colors, isDark, toggleTheme } = useTheme();
   const memories = useMemories();
-  const [searchQuery, setSearchQuery] = useState('');
   const [quickInput, setQuickInput] = useState('');
   const [selectedMemory, setSelectedMemory] = useState<MemoryItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const filteredMemories = searchQuery
-    ? memories.filter(m =>
-        m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
+  const filteredMemories = quickInput.trim()
+    ? memories
+      .filter(m => {
+        const query = quickInput.toLowerCase();
+        const matchesTags = m.tags.some(tag => tag.toLowerCase().includes(query));
+        const matchesTitle = m.title.toLowerCase().includes(query);
+        // Description (content) is ignored for now to improve performance as requested
+        return matchesTags || matchesTitle;
+      })
+      .sort((a, b) => {
+        const query = quickInput.toLowerCase();
+
+        // Priority 1: Tag matches
+        const aTagMatch = a.tags.some(tag => tag.toLowerCase().includes(query));
+        const bTagMatch = b.tags.some(tag => tag.toLowerCase().includes(query));
+        if (aTagMatch && !bTagMatch) return -1;
+        if (!aTagMatch && bTagMatch) return 1;
+
+        // Priority 2: Title matches
+        const aTitleMatch = a.title.toLowerCase().includes(query);
+        const bTitleMatch = b.title.toLowerCase().includes(query);
+        if (aTitleMatch && !bTitleMatch) return -1;
+        if (!aTitleMatch && bTitleMatch) return 1;
+
+        return 0;
+      })
     : memories;
 
   const handleQuickCapture = () => {
@@ -43,7 +62,7 @@ export default function HomeScreen() {
         tags: ['quick-capture'],
         timestamp: new Date().toISOString(),
       };
-      
+
       memoryStorage.saveMemory(newMemory);
       setQuickInput('');
     }
@@ -72,7 +91,7 @@ export default function HomeScreen() {
         <View style={[styles.inputContainer, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
           <TextInput
             style={[styles.searchInput, { color: colors.foreground }]}
-            placeholder="Save a thought, link, or idea..."
+            placeholder="Search or save a thought..."
             placeholderTextColor={colors.mutedForeground}
             value={quickInput}
             onChangeText={setQuickInput}

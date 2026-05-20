@@ -5,11 +5,15 @@ import {
   StyleSheet,
   Image,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Card, Badge } from './ui';
 import { theme } from '../constants';
 import { MemoryItem } from '../types';
 import { FileTextIcon, LinkIcon, ImageIcon } from './icons';
+import Feather from '@expo/vector-icons/Feather';
+import { memoryStorage } from '../utils/mmkv';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface MemoryCardProps {
   item: MemoryItem;
@@ -17,6 +21,35 @@ interface MemoryCardProps {
 }
 
 export const MemoryCard: React.FC<MemoryCardProps> = ({ item, onPress }) => {
+  const handleMenuPress = () => {
+    Alert.alert(
+      'Memory Options',
+      'What would you like to do?',
+      [
+        {
+          text: 'Delete',
+          onPress: () => {
+            Alert.alert(
+              'Delete Memory',
+              'Are you sure you want to delete this memory?',
+              [
+                {
+                  text: 'Delete',
+                  onPress: () => memoryStorage.deleteMemory(item.id),
+                  style: 'destructive',
+                },
+                { text: 'Cancel', style: 'cancel' },
+              ]
+            );
+          },
+          style: 'destructive',
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
+  const { colors } = useTheme();
+
   const getTypeIcon = () => {
     switch (item.type) {
       case 'link':
@@ -41,10 +74,19 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({ item, onPress }) => {
           {getTypeIcon()}
         </View>
         <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.title}
-          </Text>
-          <Text style={styles.description} numberOfLines={2}>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.title, { color: colors.foreground }]} numberOfLines={2}>
+              {item.title}
+            </Text>
+            <TouchableOpacity
+              onPress={handleMenuPress}
+              style={styles.moreButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Feather name="more-vertical" size={20} color={colors.mutedForeground} />
+            </TouchableOpacity>
+          </View>
+          <Text style={[styles.description, { color: colors.mutedForeground }]} numberOfLines={2}>
             {item.content}
           </Text>
           {item.preview && item.type === 'image' && (
@@ -56,13 +98,13 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({ item, onPress }) => {
           )}
           <View style={styles.tagsContainer}>
             {item.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
+              <Badge key={tag} variant="secondary" style={{ backgroundColor: colors.muted }}>
                 {tag}
               </Badge>
             ))}
           </View>
           <Text style={styles.date}>
-            {formatDate(item.timestamp)}
+            {formatDate(new Date(item.timestamp))}
           </Text>
         </View>
       </View>
@@ -81,11 +123,22 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  titleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: theme.spacing.xs,
+  },
   title: {
+    flex: 1,
     fontSize: theme.fontSize.base,
     fontWeight: theme.fontWeight.medium as any,
     color: theme.colors.foreground,
-    marginBottom: theme.spacing.xs,
+  },
+  moreButton: {
+    padding: theme.spacing.xs,
+    marginRight: -theme.spacing.xs,
+    marginTop: -theme.spacing.xs,
   },
   description: {
     fontSize: theme.fontSize.sm,
