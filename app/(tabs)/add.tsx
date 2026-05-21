@@ -18,15 +18,16 @@ import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@contexts/ThemeContext';
 import { memoryStorage } from '../../src/utils/mmkv';
 import { MemoryItem } from '../../src/types';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import ai from '@/src/services/ai/ai';
 import { fetchPartialHtml } from '@/src/utils/helpers';
 import { Type } from '@google/genai';
 
 export default function AddScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { colors, isDark, toggleTheme } = useTheme();
-  const [captureInput, setCaptureInput] = useState('');
+  const [captureInput, setCaptureInput] = useState((params.url as string) || '');
   const [captureTitle, setCaptureTitle] = useState('');
   const [captureDescription, setCaptureDescription] = useState('');
   const [captureTags, setCaptureTags] = useState<string[]>([]);
@@ -35,6 +36,14 @@ export default function AddScreen() {
   const [shouldUseAI, setShouldUseAI] = useState(true);
   const [newTagInput, setNewTagInput] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
+
+  React.useEffect(() => {
+    if (params.url) {
+      setCaptureInput(params.url as string);
+      // Clear params to avoid re-filling if user navigates away and back
+      router.setParams({ url: '' });
+    }
+  }, [params.url]);
 
   const toggleAISwitch = () => {
     const newValue = !shouldUseAI;
