@@ -39,6 +39,32 @@ export default function AddScreen() {
   const [newTagInput, setNewTagInput] = useState('');
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // List of domains that are not recommended for AI analysis (login walls, video platforms, etc.)
+  const NON_RECOMMENDED_DOMAINS = [
+    // Video Platforms
+    'youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com', 'twitch.tv',
+    'netflix.com', 'primevideo.com', 'hulu.com', 'disneyplus.com',
+    // Social Media
+    'instagram.com', 'facebook.com', 'twitter.com', 'x.com', 'linkedin.com',
+    'tiktok.com', 'pinterest.com', 'snapchat.com', 'threads.net',
+    // Others with login walls or heavy dynamic content
+    'reddit.com', 'quora.com'
+  ];
+
+  const checkIfAIRecommended = (url: string) => {
+    if (!url || !url.match(URL_REGEX)) return true;
+    try {
+      const hostname = url.replace(/^(https?:\/\/)?(www\.)?/, '').split('/')[0].toLowerCase();
+      return !NON_RECOMMENDED_DOMAINS.some(domain =>
+        hostname === domain || hostname.endsWith('.' + domain)
+      );
+    } catch (e) {
+      return true;
+    }
+  };
+
+  const aiRecommend = checkIfAIRecommended(captureInput);
+
   React.useEffect(() => {
     if (params.url) {
       setCaptureInput(params.url as string);
@@ -254,6 +280,14 @@ export default function AddScreen() {
               minHeight={100}
               disabled={hasAnalyzed}
             />
+            {!aiRecommend && captureInput.match(URL_REGEX) && !hasAnalyzed && (
+              <View style={[styles.recommendationContainer, { backgroundColor: colors.inputBackground, borderColor: colors.border }]}>
+                <Feather name="info" size={14} color={colors.mutedForeground} style={{ marginTop: 2 }} />
+                <Text style={[styles.recommendationText, { color: colors.mutedForeground }]}>
+                  The link you have pasted is not recommended for AI analysis as AI may not have access to it. Please use AI only if you know the link, otherwise use the content field by typing your note.
+                </Text>
+              </View>
+            )}
             {!hasAnalyzed && (
               <Button
                 onPress={analyzeWithAI}
@@ -459,6 +493,20 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium as any,
     marginBottom: theme.spacing.sm,
+  },
+  recommendationContainer: {
+    flexDirection: 'row',
+    gap: theme.spacing.md,
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.sm,
+    borderWidth: 1,
+    // marginTop: -theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
+  },
+  recommendationText: {
+    fontSize: theme.fontSize.xs,
+    flex: 1,
+    lineHeight: 16,
   },
   analyzeButton: {
     marginTop: theme.spacing.md,
