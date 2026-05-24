@@ -5,23 +5,37 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Card, Button } from '@components/ui';
 import { theme } from '@constants/index';
 import Feather from '@expo/vector-icons/Feather';
 import { useTheme } from '@contexts/ThemeContext';
 import { useMemories } from '../../src/utils/mmkv';
+import { BackupService } from '../../src/services/BackupService';
 
 export default function ProfileScreen() {
   const { colors, isDark, toggleTheme } = useTheme();
   const memories = useMemories();
-  
+
   const totalMemories = memories.length;
   const tagsCreated = Array.from(new Set(memories.flatMap(m => m.tags))).length;
-  
+
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
   const thisWeek = memories.filter(m => new Date(m.timestamp) >= oneWeekAgo).length;
+
+  const handleExport = async () => {
+    await BackupService.saveToDevice();
+  };
+
+  const handleImport = async () => {
+    await BackupService.importData(() => {
+      // Logic to refresh the app state if needed
+      // Since useMemories uses MMKV reactive hook, it should update automatically
+      Alert.alert('Success', 'Data imported successfully and UI updated.');
+    });
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -71,15 +85,24 @@ export default function ProfileScreen() {
         {/* Actions */}
         <View style={styles.actionsSection}>
           <Button
-            title="Settings"
-            onPress={() => console.log('Settings')}
+            title="Export Data"
+            onPress={handleExport}
             variant="outline"
             fullWidth
             style={styles.actionButton}
+            icon={<Feather name="share" size={16} color={colors.foreground} />}
           />
           <Button
-            title="Export Data"
-            onPress={() => console.log('Export Data')}
+            title="Import Data"
+            onPress={handleImport}
+            variant="outline"
+            fullWidth
+            style={styles.actionButton}
+            icon={<Feather name="download" size={16} color={colors.foreground} />}
+          />
+          <Button
+            title="Settings"
+            onPress={() => console.log('Settings')}
             variant="outline"
             fullWidth
             style={styles.actionButton}

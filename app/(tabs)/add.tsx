@@ -148,7 +148,7 @@ export default function AddScreen() {
     const isURL = captureInput.match(/^(https?:\/\/)/);
 
     const newMemory: MemoryItem = {
-      id: Date.now().toString(),
+      id: new Date().toISOString(),
       type: isURL ? 'link' : 'note',
       title: captureTitle,
       content: captureDescription || captureInput,

@@ -31,7 +31,25 @@
     },
     "plugins": [
       "expo-router",
-      "expo-share-intent"
+      [
+        "expo-share-intent",
+        {
+          "ios": {
+            "enabled": true
+          },
+          "android": {
+            "enabled": true
+          }
+        }
+      ],
+      "expo-document-picker",
+      [
+        "expo-file-system",
+        {
+          "supportsOpeningDocumentsInPlace": true,
+          "enableFileSharing": true
+        }
+      ]
     ]
   }
 }
