@@ -43,27 +43,27 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   const { colors } = useTheme();
 
-  const getButtonStyle = (): ViewStyle => {
+  const baseStyle = React.useMemo(() => {
     const variantStyles: Record<ButtonVariant, ViewStyle> = {
       primary: { backgroundColor: colors.primary },
       secondary: { backgroundColor: colors.secondary },
-      outline: { ...styles.outline, borderColor: colors.border },
-      ghost: styles.ghost,
+      outline: { borderColor: colors.border },
+      ghost: {},
       destructive: { backgroundColor: colors.destructive },
     };
 
-    const baseStyle: ViewStyle = {
-      ...styles.button,
-      ...variantStyles[variant],
-      ...styles[size],
-      ...(fullWidth && styles.fullWidth),
-      ...(disabled && styles.disabled),
-    };
+    return [
+      styles.button,
+      variant === 'outline' && styles.outline,
+      variant === 'ghost' && styles.ghost,
+      variantStyles[variant],
+      styles[size],
+      fullWidth && styles.fullWidth,
+      disabled && styles.disabled,
+    ];
+  }, [colors, variant, size, fullWidth, disabled]);
 
-    return baseStyle;
-  };
-
-  const getTextStyle = (): TextStyle => {
+  const buttonTextStyle = React.useMemo(() => {
     const variantTextStyles: Record<ButtonVariant, TextStyle> = {
       primary: { color: colors.primaryForeground },
       secondary: { color: colors.secondaryForeground },
@@ -72,13 +72,11 @@ export const Button: React.FC<ButtonProps> = ({
       destructive: { color: colors.destructiveForeground },
     };
 
-    const baseStyle: TextStyle = {
-      ...styles.text,
-      ...variantTextStyles[variant],
-    };
-
-    return baseStyle;
-  };
+    return [
+      styles.text,
+      variantTextStyles[variant],
+    ];
+  }, [colors, variant]);
 
   const getActivityColor = () => {
     return variant === 'primary' ? colors.primaryForeground : colors.primary;
@@ -86,7 +84,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <TouchableOpacity
-      style={[getButtonStyle(), style]}
+      style={[baseStyle, style]}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
@@ -98,7 +96,7 @@ export const Button: React.FC<ButtonProps> = ({
       ) : (
         <View style={styles.content}>
           {icon && <View>{icon}</View>}
-          {title && <Text style={[getTextStyle(), textStyle]}>{title}</Text>}
+          {title && <Text style={[buttonTextStyle, textStyle]}>{title}</Text>}
         </View>
       )}
     </TouchableOpacity>

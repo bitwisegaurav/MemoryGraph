@@ -324,9 +324,9 @@ export default function AddScreen() {
                       style={styles.tagButton}
                     >
                       <Badge variant="secondary" style={styles.tagBadge} childrenType="children">
-                        <Text style={styles.tagText}>{tag}</Text>
+                        <Text style={[styles.tagText, { color: colors.foreground }]}>{tag}</Text>
                         <View>
-                          <Feather name="x" size={12} color={theme.colors.foreground} />
+                          <Feather name="x" size={12} color={colors.foreground} />
                         </View>
                       </Badge>
                     </TouchableOpacity>
@@ -344,7 +344,7 @@ export default function AddScreen() {
                     onPress={addCaptureTag}
                     disabled={!newTagInput.trim()}
                     variant="outline"
-                    icon={<Feather name='plus' size={16} color={theme.colors.foreground} />}
+                    icon={<Feather name='plus' size={16} color={colors.foreground} />}
                   />
                 </View>
 
@@ -376,9 +376,8 @@ export default function AddScreen() {
                   variant="primary"
                   fullWidth
                   style={styles.saveButton}
-                >
-                  <Text style={styles.buttonText}>Save</Text>
-                </Button>
+                  title='Save'
+                />
               </View>
             </>
           )}
@@ -551,7 +550,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.xs,
   },
   saveButton: {
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.lg * 2,
     height: 48,
   },
 });

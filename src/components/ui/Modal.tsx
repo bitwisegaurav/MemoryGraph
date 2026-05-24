@@ -23,7 +23,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   title,
 }) => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   return (
     <RNModal
       visible={visible}
@@ -31,13 +31,17 @@ export const Modal: React.FC<ModalProps> = ({
       transparent
       onRequestClose={onClose}
     >
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <View style={styles.overlay}>
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-          <View style={styles.header}>
-            {title && <Text style={[styles.title, { color: colors.mutedForeground }]}>{title}</Text>}
+          <View style={[styles.header, { borderBottomColor: colors.border }]}>
+            {title && (
+              <Text style={[styles.title, { color: colors.foreground }]}>
+                {title}
+              </Text>
+            )}
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeText}>✕</Text>
+              <Text style={[styles.closeText, { color: colors.mutedForeground }]}>✕</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.content}>{children}</View>
@@ -54,11 +58,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: theme.colors.background,
     borderTopLeftRadius: theme.borderRadius.xl,
     borderTopRightRadius: theme.borderRadius.xl,
     maxHeight: '90%',
-    // height: '90%',
   },
   header: {
     flexDirection: 'row',
@@ -67,19 +69,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.xl,
     paddingVertical: theme.spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   title: {
     fontSize: theme.fontSize.xl,
     fontWeight: theme.fontWeight.medium as any,
-    color: theme.colors.foreground,
   },
   closeButton: {
     padding: theme.spacing.sm,
   },
   closeText: {
     fontSize: theme.fontSize['2xl'],
-    color: theme.colors.mutedForeground,
     fontWeight: '300',
   },
   content: {

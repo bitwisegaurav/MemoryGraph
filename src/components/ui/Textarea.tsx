@@ -8,6 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { theme } from '../../constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface TextareaProps extends TextInputProps {
   label?: string;
@@ -26,24 +27,38 @@ export const Textarea: React.FC<TextareaProps> = ({
   style,
   ...props
 }) => {
+  const { colors } = useTheme();
+
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text style={[styles.label, { color: colors.foreground }]}>
+          {label}
+        </Text>
+      )}
       <TextInput
         style={[
           styles.textarea,
-          { minHeight },
-          error && styles.textareaError,
+          {
+            minHeight,
+            backgroundColor: colors.inputBackground,
+            borderColor: error ? colors.destructive : colors.border,
+            color: colors.foreground,
+          },
           disabled && styles.textareaDisabled,
           style,
         ]}
-        placeholderTextColor={theme.colors.mutedForeground}
+        placeholderTextColor={colors.mutedForeground}
         multiline
         textAlignVertical="top"
         editable={!disabled}
         {...props}
       />
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && (
+        <Text style={[styles.errorText, { color: colors.destructive }]}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 };
@@ -55,28 +70,20 @@ const styles = StyleSheet.create({
   label: {
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium as any,
-    color: theme.colors.foreground,
     marginBottom: theme.spacing.sm,
   },
   textarea: {
-    backgroundColor: theme.colors.inputBackground,
     borderRadius: theme.borderRadius.md,
     borderWidth: 1,
-    borderColor: theme.colors.border,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.md,
     fontSize: theme.fontSize.base,
-    color: theme.colors.foreground,
-  },
-  textareaError: {
-    borderColor: theme.colors.destructive,
   },
   textareaDisabled: {
     opacity: 0.5,
   },
   errorText: {
     fontSize: theme.fontSize.xs,
-    color: theme.colors.destructive,
     marginTop: theme.spacing.xs,
   },
 });

@@ -8,6 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { theme } from '../../constants';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -26,19 +27,37 @@ export const Input: React.FC<InputProps> = ({
   style,
   ...props
 }) => {
+  const { colors } = useTheme();
+
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[styles.inputContainer, error && styles.inputError]}>
+      {label && (
+        <Text style={[styles.label, { color: colors.foreground }]}>
+          {label}
+        </Text>
+      )}
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            backgroundColor: colors.inputBackground,
+            borderColor: error ? colors.destructive : colors.border,
+          },
+        ]}
+      >
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
         <TextInput
-          style={[styles.input, style]}
-          placeholderTextColor={theme.colors.mutedForeground}
+          style={[styles.input, { color: colors.foreground }, style]}
+          placeholderTextColor={colors.mutedForeground}
           {...props}
         />
         {rightIcon && <View style={styles.rightIcon}>{rightIcon}</View>}
       </View>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && (
+        <Text style={[styles.errorText, { color: colors.destructive }]}>
+          {error}
+        </Text>
+      )}
     </View>
   );
 };
@@ -50,26 +69,19 @@ const styles = StyleSheet.create({
   label: {
     fontSize: theme.fontSize.sm,
     fontWeight: theme.fontWeight.medium as any,
-    color: theme.colors.foreground,
     marginBottom: theme.spacing.sm,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.inputBackground,
     borderRadius: theme.borderRadius.md,
     borderWidth: 1,
-    borderColor: theme.colors.border,
     paddingHorizontal: theme.spacing.md,
     height: 48,
-  },
-  inputError: {
-    borderColor: theme.colors.destructive,
   },
   input: {
     flex: 1,
     fontSize: theme.fontSize.base,
-    color: theme.colors.foreground,
     paddingVertical: theme.spacing.sm,
   },
   leftIcon: {
@@ -80,7 +92,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: theme.fontSize.xs,
-    color: theme.colors.destructive,
     marginTop: theme.spacing.xs,
   },
 });
