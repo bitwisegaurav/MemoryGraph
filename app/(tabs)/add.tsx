@@ -1,4 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 import {
   View,
   Text,
@@ -148,7 +150,7 @@ export default function AddScreen() {
     const isURL = captureInput.match(/^(https?:\/\/)/);
 
     const newMemory: MemoryItem = {
-      id: new Date().toISOString(),
+      id: uuidv4() + '-' + Date.now().toString(),
       type: isURL ? 'link' : 'note',
       title: captureTitle,
       content: captureDescription || captureInput,
@@ -191,6 +193,16 @@ export default function AddScreen() {
       }
     }
   };
+
+  useEffect(() => {
+    if (!hasAnalyzed) {
+      setCaptureTitle('');
+      setCaptureDescription('');
+      setCaptureTags([]);
+      setNewTagInput('');
+      setShouldUseAI(true);
+    }
+  }, [hasAnalyzed]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -338,7 +350,7 @@ export default function AddScreen() {
 
                 {/* Preview for URLs */}
                 {captureInput.match(URL_REGEX) && (
-                  <View>
+                  <View style={{ marginTop: theme.spacing.md }}>
                     <Text style={[styles.label, { color: colors.foreground }]}>Preview</Text>
                     <Card padding={theme.spacing.md} onPress={handlePreviewPress}>
                       <View style={styles.previewCard}>

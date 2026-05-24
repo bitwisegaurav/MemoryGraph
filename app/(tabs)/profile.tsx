@@ -30,11 +30,7 @@ export default function ProfileScreen() {
   };
 
   const handleImport = async () => {
-    await BackupService.importData(() => {
-      // Logic to refresh the app state if needed
-      // Since useMemories uses MMKV reactive hook, it should update automatically
-      Alert.alert('Success', 'Data imported successfully and UI updated.');
-    });
+    await BackupService.importData();
   };
 
   return (

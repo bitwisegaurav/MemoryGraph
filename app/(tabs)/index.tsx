@@ -21,20 +21,21 @@ export default function HomeScreen() {
   const { colors, isDark, toggleTheme } = useTheme();
   const memories = useMemories();
   const [quickInput, setQuickInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedMemory, setSelectedMemory] = useState<MemoryItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const filteredMemories = quickInput.trim()
+  const filteredMemories = searchQuery.trim()
     ? memories
       .filter(m => {
-        const query = quickInput.toLowerCase();
+        const query = searchQuery.toLowerCase();
         const matchesTags = m.tags.some(tag => tag.toLowerCase().includes(query));
         const matchesTitle = m.title.toLowerCase().includes(query);
         // Description (content) is ignored for now to improve performance as requested
         return matchesTags || matchesTitle;
       })
       .sort((a, b) => {
-        const query = quickInput.toLowerCase();
+        const query = searchQuery.toLowerCase();
 
         // Priority 1: Tag matches
         const aTagMatch = a.tags.some(tag => tag.toLowerCase().includes(query));
@@ -52,20 +53,8 @@ export default function HomeScreen() {
       })
     : memories;
 
-  const handleQuickCapture = () => {
-    if (quickInput.trim()) {
-      const newMemory: MemoryItem = {
-        id: Date.now().toString(),
-        type: 'note',
-        title: quickInput.slice(0, 40) + (quickInput.length > 40 ? '...' : ''),
-        content: quickInput,
-        tags: ['quick-capture'],
-        timestamp: new Date().toISOString(),
-      };
-
-      memoryStorage.saveMemory(newMemory);
-      setQuickInput('');
-    }
+  const handleSearch = () => {
+    setSearchQuery(quickInput);
   };
 
   const handleMemoryPress = (item: MemoryItem) => {
@@ -94,11 +83,14 @@ export default function HomeScreen() {
             placeholder="Search or save a thought..."
             placeholderTextColor={colors.mutedForeground}
             value={quickInput}
-            onChangeText={setQuickInput}
-            onSubmitEditing={handleQuickCapture}
+            onChangeText={(text) => {
+              setQuickInput(text);
+              if (text === '') setSearchQuery(''); // Clear search if input is cleared
+            }}
+            onSubmitEditing={handleSearch}
           />
           <TouchableOpacity
-            onPress={handleQuickCapture}
+            onPress={handleSearch}
             style={styles.sparkleButton}
           >
             <Feather name="search" size={20} color={colors.foreground} />

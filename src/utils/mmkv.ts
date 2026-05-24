@@ -7,7 +7,7 @@ import { useMemo } from 'react';
  */
 export const storage: MMKV = createMMKV({
   id: 'memorygraph-storage',
-  encryptionKey: 'some-secure-key-here', // In a real app, use a more secure way to manage keys
+  encryptionKey: 'memorygraph-key-2401', // In a real app, use a more secure way to manage keys
 });
 
 const KEYS = {
